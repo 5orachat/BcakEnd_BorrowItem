@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model customers {
+  customerid Int      @id @default(autoincrement())
+  user_name  String?  @db.VarChar(100)
+  name       String   @db.VarChar(40)
+  lastname   String   @db.VarChar(40)
+  address    String   @db.VarChar(40)
+  email      String   @db.VarChar(40)
+  user       user?    @relation(fields: [user_name], references: [user_name], onDelete: Cascade, map: "fk_user_name")
+  orders     orders[]
+
+  @@index([user_name], map: "fk_user_name")
+}
+
+model employees {
+  employeeid   Int    @id @default(autoincrement())
+  username_emp String @unique(map: "username_emp") @db.VarChar(40)
+  password     String @db.VarChar(50)
+  empFirstname String @db.VarChar(40)
+  empLastname  String @db.VarChar(40)
+  jop          String @db.VarChar(30)
+  salary       Int?
+}
+
+model orders {
+  orderid    Int        @id @default(autoincrement())
+  customerid Int
+  productid  Int
+  orderdate  DateTime   @db.Date
+  quantity   Int
+  totalPrice Int
+  customers  customers  @relation(fields: [customerid], references: [customerid], onDelete: Cascade, map: "orders_ibfk_1")
+  products   products   @relation(fields: [productid], references: [productid], onDelete: Cascade, map: "orders_ibfk_2")
+  payments   payments[]
+
+  @@index([customerid], map: "customerid")
+  @@index([productid], map: "productid")
+}
+
+model payments {
+  payment_id     Int                      @id @default(autoincrement())
+  orderid        Int
+  payment_method String?                  @db.VarChar(50)
+  payment_date   DateTime?                @db.DateTime(0)
+  amount         Decimal                  @db.Decimal(10, 2)
+  payment_status payments_payment_status?
+  orders         orders                   @relation(fields: [orderid], references: [orderid], onDelete: NoAction, onUpdate: NoAction, map: "payments_ibfk_1")
+
+  @@index([orderid], map: "orderid")
+}
+
+model products {
+  productid   Int      @id @default(autoincrement())
+  productname String?  @db.VarChar(25)
+  price       Int?
+  stock       Int?
+  type        String?  @db.VarChar(25)
+  orders      orders[]
+}
+
+model user {
+  user_name String      @id @unique(map: "user_name") @db.VarChar(100)
+  Password  String      @db.VarChar(50)
+  Role      String?     @db.VarChar(50)
+  customers customers[]
+}
+
+enum payments_payment_status {
+  pending
+  completed
+  failed
+}
