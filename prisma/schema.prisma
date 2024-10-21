@@ -30,7 +30,7 @@ model products {
   product_id  Int     @id @default(autoincrement())
   productname String? @db.VarChar(100)
   stock       Int?
-  image       Bytes?  @db.Blob
+  image       String? @db.VarChar(100)
 }
 
 model user {

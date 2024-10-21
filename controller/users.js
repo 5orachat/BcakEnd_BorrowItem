@@ -23,7 +23,7 @@ const createUser = async (req, res) => {
         last_name,
         email,
         password: hashResult, // ใช้รหัสผ่านที่เข้ารหัสแล้ว
-        role: user_role
+        role: user_role || 'user'
     };
   
     try {
@@ -102,6 +102,42 @@ const getUsersByName = async (req, res) => {
 };
 
 
+async function login(req, res) {
+  const { email, password } = req.body;
+
+  // ตรวจสอบว่าผู้ใช้กรอกข้อมูลครบหรือไม่
+  if (!email || !password) {
+    return res.status(400).send('Please fill in all fields.');
+  }
+
+  try {
+    // ค้นหาผู้ใช้ในฐานข้อมูลที่มี email ตรงกับที่กรอก
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+
+    // ถ้าไม่พบผู้ใช้
+    if (!user) {
+      return res.status(404).send('User not found.');
+    }
+
+    // ตรวจสอบ password โดยใช้ bcrypt (ถ้า password ถูกเข้ารหัส)
+    const validPassword = await bcrypt.compare(password, user.password);
+    
+    if (!validPassword) {
+      return res.status(401).send('Invalid password.');
+    }
+
+    // ถ้า email และ password ตรงกัน พาผู้ใช้ไปที่หน้า home
+    res.status(200).send({ message: 'Login successful', user: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+}
 
 
-module.exports = { getUser, createUser , deleteUser, getUsersByName};
+
+
+
+module.exports = { getUser, createUser , deleteUser, getUsersByName, login};
