@@ -1,0 +1,41 @@
+CREATE DATABASE `projectitworkshop`
+
+
+CREATE TABLE `user` (
+  `user_id` int NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+);
+
+CREATE TABLE `products` (
+  `product_id` int NOT NULL AUTO_INCREMENT,
+  `productname` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stock` int DEFAULT NULL,
+  `image` blob,
+  PRIMARY KEY (`product_id`)
+);
+
+
+CREATE TABLE `borrow` (
+  `borrow_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `borrow_date` datetime DEFAULT NULL,
+  `borrow_period` blob,
+  `status` enum('Borrowing','Return','Cancel','Late') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`borrow_id`),
+  KEY `users_ibfk_1` (`user_id`)
+);
+
+
+CREATE TABLE `borrowdetail` (
+  `borrow_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `amount` int NOT NULL,
+  PRIMARY KEY (`borrow_id`,`product_id`),
+  KEY `product_id` (`product_id`)
+);
